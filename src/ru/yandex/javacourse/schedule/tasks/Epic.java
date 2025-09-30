@@ -3,25 +3,26 @@ package ru.yandex.javacourse.schedule.tasks;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Epic extends Task {
-	protected ArrayList<Integer> subtaskIds = new ArrayList<>();
-
-	public Epic(int id, String name, String description) {
-		super(id, name, description, NEW);
-	}
+	protected Set<Integer> subtaskIds = new HashSet<>();
 
 	public Epic(String name, String description) {
 		super(name, description, NEW);
 	}
 
 	public void addSubtaskId(int id) {
+		if (id == this.id) {
+			throw new IllegalArgumentException("Subtask cannot be attached to itself");
+		}
 		subtaskIds.add(id);
 	}
 
 	public List<Integer> getSubtaskIds() {
-		return subtaskIds;
+		return new ArrayList<>(subtaskIds);
 	}
 
 	public void cleanSubtaskIds() {
@@ -29,7 +30,7 @@ public class Epic extends Task {
 	}
 
 	public void removeSubtask(int id) {
-		subtaskIds.remove(Integer.valueOf(id));
+		subtaskIds.remove(id);
 	}
 
 	@Override
