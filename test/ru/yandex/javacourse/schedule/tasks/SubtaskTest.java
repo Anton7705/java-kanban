@@ -25,4 +25,10 @@ public class SubtaskTest {
     public void testNotSelfAttaching() {
         assertThrows(IllegalArgumentException.class, () -> new Subtask("Subtask 1", "Testing subtask 1", TaskStatus.NEW, 0));
     }
+
+    @Test
+    public void subtaskTypeShouldBeSubtask() {
+        Task subtask = new Subtask("Test 1", "Testing task 1", TaskStatus.NEW, 1);
+        assertEquals(TaskType.SUBTASK, subtask.getType());
+    }
 }

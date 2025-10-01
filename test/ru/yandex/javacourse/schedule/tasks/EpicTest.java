@@ -31,4 +31,10 @@ public class EpicTest {
         assertThrows(IllegalArgumentException.class, () -> epic.addSubtaskId(id));
         assertEquals(0, epic.subtaskIds.size(), "epic should not add itself as subtask");
     }
+
+    @Test
+    public void epicTypeShouldBeEpic() {
+        Task epic = new Epic( "Epic 1", "Testing epic 1");
+        assertEquals(TaskType.EPIC, epic.getType());
+    }
 }

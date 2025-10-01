@@ -2,16 +2,14 @@ package ru.yandex.javacourse.schedule.manager;
 
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
+import static ru.yandex.javacourse.schedule.tasks.TaskType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+import ru.yandex.javacourse.schedule.tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -172,13 +170,13 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void deleteTasks() {
-		historyManager.removeAll(Task.class);
+		historyManager.removeAll(TASK);
 		tasks.clear();
 	}
 
 	@Override
 	public void deleteSubtasks() {
-		historyManager.removeAll(Subtask.class);
+		historyManager.removeAll(SUBTASK);
 		for (Epic epic : epics.values()) {
 			epic.cleanSubtaskIds();
 			updateEpicStatus(epic.getId());
@@ -188,8 +186,8 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void deleteEpics() {
-		historyManager.removeAll(Subtask.class);
-		historyManager.removeAll(Epic.class);
+		historyManager.removeAll(SUBTASK);
+		historyManager.removeAll(EPIC);
 		epics.clear();
 		subtasks.clear();
 	}

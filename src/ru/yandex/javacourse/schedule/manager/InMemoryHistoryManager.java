@@ -3,6 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import java.util.*;
 
 import ru.yandex.javacourse.schedule.tasks.Task;
+import ru.yandex.javacourse.schedule.tasks.TaskType;
 
 /**
  * In memory history manager.
@@ -17,10 +18,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 
 	@Override
-	public void removeAll(Class clz) {
+	public void removeAll(TaskType type) {
 		List<Task> list = getHistory();
 		for (Task task : list) {
-			if (task.getClass() == clz) {
+			if (task.getType() == type) {
 				remove(task.getId());
 			}
 		}

@@ -1,14 +1,14 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+import ru.yandex.javacourse.schedule.tasks.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.yandex.javacourse.schedule.tasks.TaskType.*;
 
+@DisplayName("Менеджер истории задач")
 public class InMemoryHistoryManagerTest {
 
     HistoryManager historyManager;
@@ -19,6 +19,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("Не добавлять дубликат задачи в историю")
     public void testHistoricVersions(){
         Task task = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         historyManager.addTask(task);
@@ -29,6 +30,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("Обновлять задачу в истории при повторном добавлении")
     public void testHistoricVersionsByPointer(){
         Task task = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         historyManager.addTask(task);
@@ -40,6 +42,7 @@ public class InMemoryHistoryManagerTest {
 
 
     @Test
+    @DisplayName("Заменять предыдущую задачу при добавлении с одинаковым ID")
     public void shouldRemovePreviousTaskWhenAddingDuplicateId() {
         Task task1 = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task("Test 2", "Testiong task 2", TaskStatus.NEW);
@@ -52,6 +55,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("Добавлять задачи с разными ID в историю")
     public void testHistoricAddingTasksWithDifferentId() {
         Task task1 = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task("Test 2", "Testiong task 2", TaskStatus.NEW);
@@ -63,6 +67,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("Удалять задачи из истории по ID")
     public void testHistoricRemoveTasksById() {
         Task task1 = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task("Test 2", "Testiong task 2", TaskStatus.NEW);
@@ -77,6 +82,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("Удалять все задачи из истории")
     public void testHistoricRemoveAllTasks() {
         Task task1 = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task("Test 2", "Testiong task 2", TaskStatus.NEW);
@@ -84,11 +90,12 @@ public class InMemoryHistoryManagerTest {
         task2.setId(2);
         historyManager.addTask(task1);
         historyManager.addTask(task2);
-        historyManager.removeAll(Task.class);
+        historyManager.removeAll(TASK);
         assertEquals(0, historyManager.getHistory().size(), "All tasks should be removed");
     }
 
     @Test
+    @DisplayName("Удалять все эпики из истории")
     public void testHistoricRemoveAllEpics() {
         Epic epic1 = new Epic("Epic 1", "Testing epic 1");
         Epic epic2 = new Epic("Epic 2", "Testing epic 2");
@@ -96,11 +103,12 @@ public class InMemoryHistoryManagerTest {
         epic2.setId(2);
         historyManager.addTask(epic1);
         historyManager.addTask(epic2);
-        historyManager.removeAll(Epic.class);
+        historyManager.removeAll(EPIC);
         assertEquals(0, historyManager.getHistory().size(), "All epics should be removed");
     }
 
     @Test
+    @DisplayName("Удалять все подзадачи из истории")
     public void testHistoricRemoveAllSubtasks() {
         Subtask subtask1 = new Subtask("Test 1", "Testing task 1", TaskStatus.NEW, 1);
         Subtask subtask2 = new Subtask("Test 1", "Testing task 1", TaskStatus.NEW, 1);
@@ -108,7 +116,7 @@ public class InMemoryHistoryManagerTest {
         subtask2.setId(2);
         historyManager.addTask(subtask1);
         historyManager.addTask(subtask2);
-        historyManager.removeAll(Subtask.class);
+        historyManager.removeAll(SUBTASK);
         assertEquals(0, historyManager.getHistory().size(), "All subtasks should be removed");
     }
 
