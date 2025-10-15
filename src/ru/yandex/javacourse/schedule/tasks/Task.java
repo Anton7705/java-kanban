@@ -7,13 +7,7 @@ public class Task {
 	protected String name;
 	protected TaskStatus status;
 	protected String description;
-
-	public Task(int id, String name, String description, TaskStatus status) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.status = status;
-	}
+	protected boolean isManaged = false;
 
 	public Task(String name, String description, TaskStatus status) {
 		this.name = name;
@@ -21,11 +15,22 @@ public class Task {
 		this.status = status;
 	}
 
+	public TaskType getType() {
+		return TaskType.TASK;
+	}
+
+	public void isManagedTrue() {
+		isManaged = true;
+	}
+
 	public int getId() {
 		return id;
 	}
 
 	public void setId(int id) {
+		if (isManaged) {
+			throw new IllegalStateException("Cannot change id of managed task");
+		}
 		this.id = id;
 	}
 
