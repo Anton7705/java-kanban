@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Task {
@@ -80,4 +81,13 @@ public class Task {
 				", description='" + description + '\'' +
 				'}';
 	}
+
+	public String toStringForFile() {
+		return id +
+				"," + getType() +
+				"," + name +
+				"," + status +
+				"," + description;
+	}
+
 }
