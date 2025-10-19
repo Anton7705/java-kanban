@@ -18,6 +18,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.filePath = filePath;
         fileExists();
     }
+
     @Override
     public int addNewEpic(Epic epic) {
         int id = super.addNewEpic(epic);
@@ -100,7 +101,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (!Files.exists(path)) {
             throw new ManagerSaveException("File does not exist");
         }
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)){
+        try (BufferedReader bufferedReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             String header = bufferedReader.readLine();
             if (!header.equals(HEAD)) {
                 throw new ManagerSaveException("Invalid file header. Expected: " + HEAD + ", but was: " + header);
@@ -114,7 +115,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     manager.epics.put(epic.getId(), epic);
                 } else if (parsed instanceof Subtask subtask) {
                     manager.subtasks.put(subtask.getId(), subtask);
-                } else if (parsed instanceof Task task){
+                } else if (parsed instanceof Task task) {
                     manager.tasks.put(task.getId(), task);
                 }
             }
