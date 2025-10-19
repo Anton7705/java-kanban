@@ -14,7 +14,6 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 import java.io.File;
 import java.io.IOException;
 
-
 public class Main {
 
 	public static void main(String[] args) {
@@ -72,6 +71,7 @@ public class Main {
 		printAllTasks(FileBackedTaskManager.loadFromFile(tempFile));
 
 	}
+
 	private static void printAllTasks(TaskManager manager) {
 		System.out.println("Задачи:");
 		for (Task task : manager.getTasks()) {
