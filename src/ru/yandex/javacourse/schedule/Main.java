@@ -13,8 +13,6 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class Main {
 	public static void main(String[] args) {
@@ -27,10 +25,8 @@ public class Main {
 			throw new RuntimeException("Не удалось создать временный файл", e);
 		}
 
-
 		TaskManager manager = Managers.getDefaultFileBackedTaskManager(tempFile.toPath());
 
-		// Создание
 		Task task1 = new Task("Task #1", "Task1 description", NEW);
 		Task task2 = new Task("Task #2", "Task2 description", IN_PROGRESS);
 		final int taskId1 = manager.addNewTask(task1);
