@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import ru.yandex.javacourse.schedule.managerExceptions.ManagerSaveException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.BufferedReader;
@@ -109,13 +110,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             int maxId = 0;
             while (bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
-                Task parsed = fromString(line);
+                Task task = fromString(line);
 
-                if (parsed instanceof Epic epic) {
+                if (task.getType() == TaskType.EPIC) {
+                    Epic epic = (Epic) task;
                     manager.epics.put(epic.getId(), epic);
-                } else if (parsed instanceof Subtask subtask) {
+                } else if (task.getType() == TaskType.SUBTASK) {
+                    Subtask subtask = (Subtask) task;
                     manager.subtasks.put(subtask.getId(), subtask);
-                } else if (parsed instanceof Task task) {
+                } else if (task.getType() == TaskType.TASK) {
                     manager.tasks.put(task.getId(), task);
                 }
             }
