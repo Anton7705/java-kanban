@@ -80,4 +80,13 @@ public class Task {
 				", description='" + description + '\'' +
 				'}';
 	}
+
+	public String toStringForFile() {
+		return id +
+				"," + getType() +
+				"," + name +
+				"," + status +
+				"," + description;
+	}
+
 }

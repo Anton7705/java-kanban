@@ -30,5 +30,11 @@ public class Subtask extends Task {
 				", description='" + description + '\'' +
 				'}';
 	}
+
+
+	@Override
+	public String toStringForFile() {
+		return super.toStringForFile() + "," + epicId;
+	}
 }
 
