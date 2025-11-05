@@ -10,10 +10,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path filePath;
-    private static final String HEAD = "id,type,name,status,description,epic/subtaskIds";
+    private static final String HEAD = "id,type,name,status,description,duration,startTime,epic/subtaskIds";
 
     public FileBackedTaskManager(Path filePath) {
         this.filePath = filePath;
@@ -112,6 +113,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 String line = bufferedReader.readLine();
                 Task task = fromString(line);
 
+                if (task.getId() > maxId) {
+                    maxId = task.getId();
+                }
+
                 if (task.getType() == TaskType.EPIC) {
                     Epic epic = (Epic) task;
                     manager.epics.put(epic.getId(), epic);
@@ -122,6 +127,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     manager.tasks.put(task.getId(), task);
                 }
             }
+
+            for (Epic epic : manager.epics.values()) {
+                manager.updateEpicTimes(epic.getId());
+            }
+
             manager.generatorId = maxId;
             return manager;
         } catch (IOException e) {
@@ -171,30 +181,37 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = fieldes[2];
         TaskStatus status = TaskStatus.valueOf(fieldes[3]);
         String description = fieldes[4];
+        String duration = fieldes[5];
+        String stringStartTime = fieldes[6];
+        long minutes = Integer.parseInt(duration);
+        LocalDateTime startTime = null;
+        if (!stringStartTime.equals("null")) {
+            startTime = LocalDateTime.parse(stringStartTime);
+        }
         switch (taskType) {
             case TASK -> {
-                Task task = new Task(name, description, status);
+                Task task = new Task(name, description, status, minutes, startTime);
                 task.setId(id);
                 return task;
             }
             case SUBTASK -> {
-                int epicId = Integer.parseInt(fieldes[5]);
-                Subtask subtask = new Subtask(name, description, status, epicId);
+                int epicId = Integer.parseInt(fieldes[7]);
+                Subtask subtask = new Subtask(name, description, status, epicId, minutes, startTime);
                 subtask.setId(id);
                 return subtask;
             }
             case EPIC -> {
-                String firstSetElement = fieldes[5].replace("[", "");
-                fieldes[5] = firstSetElement;
+                String firstSetElement = fieldes[7].replace("[", "");
+                fieldes[7] = firstSetElement;
                 String lastSetElement = fieldes[fieldes.length - 1].replace("]", "");
                 fieldes[fieldes.length - 1] = lastSetElement;
                 Epic epic = new Epic(name, description);
                 epic.setStatus(status);
                 epic.setId(id);
-                if (fieldes[5].isEmpty()) {
+                if (fieldes[7].isEmpty()) {
                     return epic;
                 }
-                for (int i = 5; i < fieldes.length; i++) {
+                for (int i = 7; i < fieldes.length; i++) {
                     epic.addSubtaskId(Integer.parseInt(fieldes[i].trim()));
                 }
                 return epic;

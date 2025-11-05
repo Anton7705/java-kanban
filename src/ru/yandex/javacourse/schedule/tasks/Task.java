@@ -1,6 +1,9 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
 	protected int id;
@@ -8,11 +11,59 @@ public class Task {
 	protected TaskStatus status;
 	protected String description;
 	protected boolean isManaged = false;
+	protected Duration duration = Duration.ZERO;
+	protected LocalDateTime startTime;
 
 	public Task(String name, String description, TaskStatus status) {
 		this.name = name;
 		this.description = description;
 		this.status = status;
+	}
+
+	public Task(String name, String description, TaskStatus status, long minutes) {
+		this(name, description, status);
+		this.duration = Duration.ofMinutes(minutes);
+	}
+
+	public Task(String name, String description, TaskStatus status, long minutes, LocalDateTime startTime) {
+		this(name, description, status, minutes);
+		this.startTime = startTime;
+	}
+
+	public Optional<LocalDateTime> getEndTime() {
+		if (startTime == null || duration == null) {
+			return Optional.empty();
+		}
+		return Optional.of(startTime.plus(duration));
+	}
+
+	public Optional<LocalDateTime> getStartTime() {
+		return Optional.ofNullable(startTime);
+	}
+
+	public Duration getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Duration duration) {
+		if (duration == null) {
+			throw new IllegalArgumentException();
+		}
+		this.duration = duration;
+	}
+
+	public void setStartTime(LocalDateTime startTime) {
+		this.startTime = startTime;
+	}
+
+	public boolean isTimeOverlap(Task other) {
+		if (this == other) return false;
+		if (this.startTime == null || other.startTime == null) return false;
+
+		LocalDateTime thisEnd = this.getEndTime().get();
+		LocalDateTime otherEnd = other.getEndTime().get();
+
+		return this.startTime.isBefore(otherEnd) && other.startTime.isBefore(thisEnd);
 	}
 
 	public TaskType getType() {
@@ -86,7 +137,9 @@ public class Task {
 				"," + getType() +
 				"," + name +
 				"," + status +
-				"," + description;
+				"," + description +
+				"," + duration.toMinutes() +
+				"," + startTime;
 	}
 
 }

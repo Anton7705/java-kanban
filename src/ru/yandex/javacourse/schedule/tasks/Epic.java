@@ -2,13 +2,13 @@ package ru.yandex.javacourse.schedule.tasks;
 
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class Epic extends Task {
 	protected Set<Integer> subtaskIds = new HashSet<>();
+	protected LocalDateTime endTime;
 
 	public Epic(String name, String description) {
 		super(name, description, NEW);
@@ -19,6 +19,20 @@ public class Epic extends Task {
 			throw new IllegalArgumentException("Subtask cannot be attached to itself");
 		}
 		subtaskIds.add(id);
+	}
+
+	@Override
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+	}
+
+    public void setEndTime(LocalDateTime endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
+	public Optional<LocalDateTime> getEndTime() {
+		return Optional.ofNullable(endTime);
 	}
 
 	@Override
