@@ -12,6 +12,9 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,13 +41,18 @@ public class FileBackedTaskManagerTest {
     @DisplayName("Проверка корректного текстового представления классов для сохранения в файл")
     @Test
     public void toStringForFileTest() {
-        Task task1 = new Task("Task #1", "Task1 description", NEW);
+        int min = 90;
+        Duration duration = Duration.ofMinutes(min);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTimePlusDuration = localDateTime.plus(duration);
+
+        Task task1 = new Task("Task #1", "Task1 description", NEW, min, localDateTime);
         manager.addNewTask(task1);
 
         Epic epic1 = new Epic("Epic #1", "Epic1 description");
         final int epicId1 = manager.addNewEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Subtask #1-1", "Subtask1 description", NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-1", "Subtask1 description", NEW, epicId1, min, localDateTimePlusDuration);
         Subtask subtask2 = new Subtask("Subtask #2-1", "Subtask1 description", NEW, epicId1);
         Subtask subtask3 = new Subtask("Subtask #3-2", "Subtask1 description", DONE, epicId1);
 
@@ -52,9 +60,9 @@ public class FileBackedTaskManagerTest {
         manager.addNewSubtask(subtask2);
         manager.addNewSubtask(subtask3);
 
-        assertEquals("1,TASK,Task #1,NEW,Task1 description", task1.toStringForFile());
-        assertEquals("3,SUBTASK,Subtask #1-1,NEW,Subtask1 description,2", subtask1.toStringForFile());
-        assertEquals("2,EPIC,Epic #1,IN_PROGRESS,Epic1 description,[3, 4, 5]", epic1.toStringForFile());
+        assertEquals("1,TASK,Task #1,NEW,Task1 description," + min + "," + localDateTime, task1.toStringForFile());
+        assertEquals("3,SUBTASK,Subtask #1-1,NEW,Subtask1 description," + min + "," + localDateTimePlusDuration + ",2", subtask1.toStringForFile());
+        assertEquals("2,EPIC,Epic #1,IN_PROGRESS,Epic1 description," + min + "," + localDateTimePlusDuration + ",[3, 4, 5]", epic1.toStringForFile());
     }
 
     @DisplayName("Парсинг строкового представления в объекты всех типов задач")
@@ -117,7 +125,7 @@ public class FileBackedTaskManagerTest {
         manager.addNewSubtask(subtask2);
         manager.addNewSubtask(subtask3);
 
-        assertEquals("id,type,name,status,description,epic/subtaskIds", bufferedReader.readLine());
+        assertEquals("id,type,name,status,description,duration,startTime,epic/subtaskIds", bufferedReader.readLine());
         assertEquals(task1.toStringForFile(), bufferedReader.readLine());
         assertEquals(epic1.toStringForFile(), bufferedReader.readLine());
         assertEquals(epic2.toStringForFile(), bufferedReader.readLine());
