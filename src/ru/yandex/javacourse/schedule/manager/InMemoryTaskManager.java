@@ -1,7 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
-import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
+import static ru.yandex.javacourse.schedule.tasks.TaskStatus.*;
 import static ru.yandex.javacourse.schedule.tasks.TaskType.*;
 
 import java.time.Duration;
@@ -99,15 +98,14 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public ArrayList<Subtask> getEpicSubtasks(int epicId) {
-		ArrayList<Subtask> tasks = new ArrayList<>();
 		Epic epic = epics.get(epicId);
 		if (epic == null) {
 			return null;
 		}
-		for (int id : epic.getSubtaskIds()) {
-			tasks.add(subtasks.get(id));
-		}
-		return tasks;
+		return epic.getSubtaskIds()
+				.stream()
+				.map(subtasks::get)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path filePath;
@@ -201,18 +202,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return subtask;
             }
             case EPIC -> {
-                String firstSetElement = fieldes[7].replace("[", "");
-                fieldes[7] = firstSetElement;
-                String lastSetElement = fieldes[fieldes.length - 1].replace("]", "");
-                fieldes[fieldes.length - 1] = lastSetElement;
                 Epic epic = new Epic(name, description);
                 epic.setStatus(status);
                 epic.setId(id);
-                if (fieldes[7].isEmpty()) {
-                    return epic;
-                }
-                for (int i = 7; i < fieldes.length; i++) {
-                    epic.addSubtaskId(Integer.parseInt(fieldes[i].trim()));
+                if (fieldes.length > 7 && !fieldes[7].isEmpty()) {
+                    Arrays.stream(fieldes, 7, fieldes.length)
+                            .map(field -> field.replace("[", "").replace("]", "").trim())
+                            .filter(field -> !field.isEmpty())
+                            .map(Integer::parseInt)
+                            .forEach(epic::addSubtaskId);
                 }
                 return epic;
             }

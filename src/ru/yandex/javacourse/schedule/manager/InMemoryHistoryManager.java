@@ -19,12 +19,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 	@Override
 	public void removeAll(TaskType type) {
-		List<Task> list = getHistory();
-		for (Task task : list) {
-			if (task.getType() == type) {
-				remove(task.getId());
-			}
-		}
+		getHistory().stream()
+				.filter(task -> task.getType() == type)
+				.forEach(task -> remove(task.getId()));
 
 	}
 
