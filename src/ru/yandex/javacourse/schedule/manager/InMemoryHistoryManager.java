@@ -22,7 +22,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 		getHistory().stream()
 				.filter(task -> task.getType() == type)
 				.forEach(task -> remove(task.getId()));
-
 	}
 
 	@Override
