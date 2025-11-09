@@ -1,7 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.Epic;
@@ -9,25 +7,28 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.*;
 
-public class FileBackedTaskManagerTest {
-    File tempFile;
-    FileBackedTaskManager manager;
+@DisplayName("FileBackedTaskManager: Менеджер задач с файловым хранилищем")
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-    @BeforeEach
-    public void initManager() throws IOException {
-        tempFile = File.createTempFile("task_manager_test", ".csv");
-        manager = Managers.getDefaultFileBackedTaskManager(tempFile.toPath());
+    private File tempFile;
+
+    @Override
+    protected FileBackedTaskManager createManager() {
+        try {
+            tempFile = File.createTempFile("task_manager_test", ".csv");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new FileBackedTaskManager(tempFile.toPath());
     }
 
     @DisplayName("Проверка создания файла по названию при вызове конструткора")

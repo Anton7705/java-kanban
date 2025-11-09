@@ -11,7 +11,7 @@ import static ru.yandex.javacourse.schedule.tasks.TaskType.*;
 @DisplayName("Менеджер истории задач")
 public class InMemoryHistoryManagerTest {
 
-    HistoryManager historyManager;
+    private HistoryManager historyManager;
 
     @BeforeEach
     public void initHistoryManager() {
@@ -120,4 +120,51 @@ public class InMemoryHistoryManagerTest {
         assertEquals(0, historyManager.getHistory().size(), "All subtasks should be removed");
     }
 
+    @Test
+    @DisplayName("Удаление задачи из начала истории")
+    public void testRemoveFromBeginning() {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task3 = new Task("Test 3", "Testing task 3", TaskStatus.NEW);
+        task1.setId(1);
+        task2.setId(2);
+        task3.setId(3);
+        historyManager.addTask(task1);
+        historyManager.addTask(task2);
+        historyManager.addTask(task3);
+        historyManager.remove(task1.getId());
+        assertEquals(2, historyManager.getHistory().size());
+    }
+
+    @Test
+    @DisplayName("Удаление задачи из середины истории")
+    public void testRemoveFromMiddle() {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task3 = new Task("Test 3", "Testing task 3", TaskStatus.NEW);
+        task1.setId(1);
+        task2.setId(2);
+        task3.setId(3);
+        historyManager.addTask(task1);
+        historyManager.addTask(task2);
+        historyManager.addTask(task3);
+        historyManager.remove(task2.getId());
+        assertEquals(2, historyManager.getHistory().size());
+    }
+
+    @Test
+    @DisplayName("Удаление задачи из конца истории")
+    public void testRemoveFromEnd() {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task3 = new Task("Test 3", "Testing task 3", TaskStatus.NEW);
+        task1.setId(1);
+        task2.setId(2);
+        task3.setId(3);
+        historyManager.addTask(task1);
+        historyManager.addTask(task2);
+        historyManager.addTask(task3);
+        historyManager.remove(task3.getId());
+        assertEquals(2, historyManager.getHistory().size());
+    }
 }

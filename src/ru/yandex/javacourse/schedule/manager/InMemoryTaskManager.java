@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
 	protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 	protected int generatorId = 0;
 	private final HistoryManager historyManager = Managers.getDefaultHistory();
-	Set<Task> taskTreeSet = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
+	private final Set<Task> taskTreeSet = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
 
 
 	protected void updateEpicTimes(int epicId) {

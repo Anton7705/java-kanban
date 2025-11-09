@@ -2,7 +2,6 @@ package ru.yandex.javacourse.schedule.tasks;
 
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -19,11 +18,6 @@ public class Epic extends Task {
 			throw new IllegalArgumentException("Subtask cannot be attached to itself");
 		}
 		subtaskIds.add(id);
-	}
-
-	@Override
-	public void setDuration(Duration duration) {
-		this.duration = duration;
 	}
 
     public void setEndTime(LocalDateTime endTime) {
