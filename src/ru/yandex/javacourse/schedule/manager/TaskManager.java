@@ -12,6 +12,9 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public interface TaskManager {
+
+	List<Task> getPrioritizedTasks();
+
 	List<Task> getTasks();
 
 	List<Subtask> getSubtasks();

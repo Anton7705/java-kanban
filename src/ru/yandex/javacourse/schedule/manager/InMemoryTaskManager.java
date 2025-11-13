@@ -1,14 +1,14 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
-import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
+import static ru.yandex.javacourse.schedule.tasks.TaskStatus.*;
 import static ru.yandex.javacourse.schedule.tasks.TaskType.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import ru.yandex.javacourse.schedule.managerExceptions.ManagerValidateException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -18,6 +18,67 @@ public class InMemoryTaskManager implements TaskManager {
 	protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 	protected int generatorId = 0;
 	private final HistoryManager historyManager = Managers.getDefaultHistory();
+	private final Set<Task> taskTreeSet = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
+
+
+	protected void updateEpicTimes(int epicId) {
+		Epic epic = epics.get(epicId);
+		if (epic == null) {
+			throw new IllegalArgumentException("Epic with id = " + epicId + " is not exists");
+		}
+		List<Subtask> epicSubtasks = getEpicSubtasks(epicId);
+
+		if (epicSubtasks.isEmpty()) {
+			epic.setDuration(Duration.ZERO);
+			epic.setStartTime(null);
+			epic.setEndTime(null);
+			return;
+		}
+
+		Duration duration = epicSubtasks.stream()
+				.map(Task::getDuration)
+				.filter(Objects::nonNull)
+				.reduce(Duration.ZERO, (Duration::plus));
+
+		LocalDateTime startTime = epicSubtasks.stream()
+				.map(Task::getStartTime)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.min(LocalDateTime::compareTo)
+				.orElse(null);
+
+		LocalDateTime endTime = epicSubtasks.stream()
+				.map(Task::getEndTime)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.max(LocalDateTime::compareTo)
+				.orElse(null);
+
+		epic.setDuration(duration);
+		epic.setStartTime(startTime);
+		epic.setEndTime(endTime);
+	}
+
+    private void validateNoTimeOverlap(Task newTask) {
+        if (newTask.getStartTime().isEmpty()) {
+            return;
+        }
+        if (taskTreeSet.stream().anyMatch(existingTask -> existingTask.isTimeOverlap(newTask))) {
+            throw new ManagerValidateException("The task overlaps with existing tasks");
+        }
+    }
+
+
+	@Override
+	public List<Task> getPrioritizedTasks() {
+		return new ArrayList<>(taskTreeSet);
+	}
+
+	private void startTimeExists(Task task) {
+        if (task.getStartTime().isPresent()) {
+            taskTreeSet.add(task);
+        }
+	}
 
 
 	@Override
@@ -37,15 +98,14 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public ArrayList<Subtask> getEpicSubtasks(int epicId) {
-		ArrayList<Subtask> tasks = new ArrayList<>();
 		Epic epic = epics.get(epicId);
 		if (epic == null) {
 			return null;
 		}
-		for (int id : epic.getSubtaskIds()) {
-			tasks.add(subtasks.get(id));
-		}
-		return tasks;
+		return epic.getSubtaskIds()
+				.stream()
+				.map(subtasks::get)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override
@@ -74,6 +134,8 @@ public class InMemoryTaskManager implements TaskManager {
 		final int id = ++generatorId;
 		task.setId(id);
 		task.isManagedTrue();
+        validateNoTimeOverlap(task);
+        startTimeExists(task);
 		tasks.put(id, task);
 		return id;
 	}
@@ -84,8 +146,8 @@ public class InMemoryTaskManager implements TaskManager {
 		epic.setId(id);
 		epic.isManagedTrue();
 		epics.put(id, epic);
+		updateEpicTimes(id);
 		return id;
-
 	}
 
 	@Override
@@ -98,9 +160,12 @@ public class InMemoryTaskManager implements TaskManager {
 		final int id = ++generatorId;
 		subtask.setId(id);
 		subtask.isManagedTrue();
+        validateNoTimeOverlap(subtask);
+        startTimeExists(subtask);
 		subtasks.put(id, subtask);
 		epic.addSubtaskId(subtask.getId());
 		updateEpicStatus(epicId);
+		updateEpicTimes(epicId);
 		return id;
 	}
 
@@ -114,6 +179,9 @@ public class InMemoryTaskManager implements TaskManager {
 		if (savedTask == null) {
 			return;
 		}
+        taskTreeSet.remove(task);
+        validateNoTimeOverlap(task);
+        startTimeExists(task);
 		tasks.put(id, task);
 	}
 
@@ -136,14 +204,19 @@ public class InMemoryTaskManager implements TaskManager {
 		if (epic == null) {
 			return;
 		}
+        taskTreeSet.remove(subtask);
+        validateNoTimeOverlap(subtask);
+        startTimeExists(subtask);
 		subtasks.put(id, subtask);
+		updateEpicTimes(epicId);
 		updateEpicStatus(epicId);
 	}
 
 	@Override
 	public void deleteTask(int id) {
 		historyManager.remove(id);
-		tasks.remove(id);
+		Task removedTask = tasks.remove(id);
+        taskTreeSet.remove(removedTask);
 	}
 
 	@Override
@@ -151,8 +224,7 @@ public class InMemoryTaskManager implements TaskManager {
 		historyManager.remove(id);
 		final Epic epic = epics.remove(id);
 		for (Integer subtaskId : epic.getSubtaskIds()) {
-			historyManager.remove(subtaskId);
-			subtasks.remove(subtaskId);
+            deleteSubtask(subtaskId);
 		}
 	}
 
@@ -165,12 +237,15 @@ public class InMemoryTaskManager implements TaskManager {
 		}
 		Epic epic = epics.get(subtask.getEpicId());
 		epic.removeSubtask(id);
+        taskTreeSet.remove(subtask);
+		updateEpicTimes(epic.getId());
 		updateEpicStatus(epic.getId());
 	}
 
 	@Override
 	public void deleteTasks() {
 		historyManager.removeAll(TASK);
+        taskTreeSet.removeAll(tasks.values());
 		tasks.clear();
 	}
 
@@ -180,12 +255,15 @@ public class InMemoryTaskManager implements TaskManager {
 		for (Epic epic : epics.values()) {
 			epic.cleanSubtaskIds();
 			updateEpicStatus(epic.getId());
+			updateEpicTimes(epic.getId());
 		}
+        taskTreeSet.removeAll(subtasks.values());
 		subtasks.clear();
 	}
 
 	@Override
 	public void deleteEpics() {
+        taskTreeSet.removeAll(subtasks.values());
 		historyManager.removeAll(SUBTASK);
 		historyManager.removeAll(EPIC);
 		epics.clear();
