@@ -14,6 +14,7 @@ public class SubtasksHandler extends BaseHttpHandler {
     public SubtasksHandler(TaskManager taskManager) {
         super(taskManager);
     }
+
     @Override
     protected void handleRequest(HttpExchange exchange) throws IOException {
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
@@ -41,8 +42,7 @@ public class SubtasksHandler extends BaseHttpHandler {
                 if (task.getId() == 0) {
                     taskManager.addNewSubtask(task);
                     sendCreated(exchange, "Подзадача создана с id = " + task.getId());
-                }
-                else {
+                } else {
                     taskManager.updateSubtask(task);
                     sendCreated(exchange, "Подзадача обновлена");
                 }
