@@ -14,7 +14,6 @@ public class SubtasksHandler extends BaseHttpHandler {
     public SubtasksHandler(TaskManager taskManager) {
         super(taskManager);
     }
-
     @Override
     protected void handleRequest(HttpExchange exchange) throws IOException {
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
