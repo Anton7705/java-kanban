@@ -3,6 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.managerExceptions.ManagerNotFoundException;
 import ru.yandex.javacourse.schedule.managerExceptions.ManagerValidateException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
@@ -135,11 +136,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.addNewTask(new Task("Test 2", "Testing task 2", NEW));
         manager.addNewEpic(epic1);
         manager.addNewEpic(epic2);
-        manager.deleteEpic(epic1.getId());
         Subtask subtask1 = new Subtask("Test 1", "Testing task 1", NEW, epic1.getId());
         Subtask subtask2 = new Subtask("Test 2", "Testing task 2", NEW, epic2.getId());
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
+        manager.deleteEpic(epic1.getId());
         assertEquals(1, manager.getEpics().size(), "One epic should be removed");
         assertEquals(1, manager.getSubtasks().size(), "One subtask should be removed");
         assertEquals(2, manager.getTasks().size(), "Tasks should not be removed");
@@ -263,7 +264,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskWithoutEpic = new Subtask("Test 2", "Testing task 2", IN_PROGRESS, 33);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
-        assertNull(manager.addNewSubtask(subtaskWithoutEpic));
+        assertThrows(ManagerNotFoundException.class, () -> manager.addNewSubtask(subtaskWithoutEpic));
         assertEquals(epicId, subtask1.getEpicId());
         assertEquals(epicId, subtask2.getEpicId());
     }
