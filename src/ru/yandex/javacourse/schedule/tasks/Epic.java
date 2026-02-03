@@ -35,6 +35,9 @@ public class Epic extends Task {
 	}
 
 	public List<Integer> getSubtaskIds() {
+		if (subtaskIds == null) {
+			subtaskIds = new HashSet<>();
+		}
 		return new ArrayList<>(subtaskIds);
 	}
 
